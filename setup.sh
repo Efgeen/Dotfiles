@@ -21,14 +21,14 @@ if ! command -v git > /dev/null 2>&1; then
     sudo apt-get install git -y
 fi
 
-if [ ! -d "$HOME/$public" ]; then
-    if ! git clone "https://github.com/$user/$public.git" "$HOME/$public" > /dev/null 2>&1; then
+if [ ! -d "$public" ]; then
+    if ! git clone "https://github.com/$user/$public.git" "$public" > /dev/null 2>&1; then
         echo "nop, public"
         exit 1
     fi
-    cd "$HOME/$public"
+    cd "$public"
 else
-    cd "$HOME/$public"
+    cd "$public"
     if ! git pull > /dev/null 2>&1; then
         echo "nop, pull"
         exit 1
@@ -49,7 +49,7 @@ fi
 
 rm -rf "$HOME/$private"
 
-if ! ln -s "$HOME/$public/$private" "$HOME/$private" > /dev/null 2>&1; then
+if ! ln -s "$public/$private" "$HOME/$private" > /dev/null 2>&1; then
     echo "nop, ln"
     exit 1
 fi
