@@ -1,44 +1,63 @@
 #!/bin/sh
 
-force=false
-username="Efgeen"
-repository=".dotfiles"
-destination="$HOME/.dotfiles"
+user="Efgeen"
+public="dotfiles"
+private=".$public"
+init="init.sh"
 
-for arg in "$@"; do
-    if [ "$arg" = "-f" ]; then
-        force=true
-        break
-    fi
-done
-
-if [ -d "$destination" ] && [ "$force" = false ]; then
-    echo "nop, exists"
-    exit 1
+if [ -d "$HOME/$private" ]; then
+    while true; do
+        read -p "~/$private !404, force? (y/n): " force
+        if [ "$force" = "y" ]; then
+            break
+        elif [ "$force" = "n" ]; then
+            exit 0
+        fi
+    done
 fi
-
-read -p "pat: " pat
 
 if ! command -v git > /dev/null 2>&1; then
     sudo apt-get update
     sudo apt-get install git -y
 fi
 
-if ! git ls-remote -h --exit-code -q "https://$username:$pat@github.com/$username/$repository.git" > /dev/null 2>&1; then
-    echo "nop, auth"
+if [ ! -d "$HOME/$public" ]; then
+    if ! git clone "https://github.com/$user/$public.git" "$HOME/$public" > /dev/null 2>&1; then
+        echo "nop, public"
+        exit 1
+    fi
+    cd "$HOME/$public"
+else
+    cd "$HOME/$public"
+    if ! git pull > /dev/null 2>&1; then
+        echo "nop, pull"
+        exit 1
+    fi
+fi
+
+read -p "pat: " pat
+
+if ! git submodule set-url "$private" "https://$user:$pat@github.com/$user/$private.git" > /dev/null 2>&1; then
+    echo "nop, set-url"
     exit 1
 fi
 
-mkdir -p "$destination"
-
-if ! git clone "https://$username:$pat@github.com/$username/$repository.git" "$destination" > /dev/null 2>&1; then
-    echo "nop, clone"
+if ! git submodule update --init > /dev/null 2>&1; then
+    echo "nop, update"
     exit 1
 fi
 
-cd "$destination"
+rm -rf "$HOME/$private"
 
-if ! sh "init.sh"; then
+if ! ln -s "$HOME/$public/$private" "$HOME/$private" > /dev/null 2>&1; then
+    echo "nop, ln"
+    exit 1
+fi
+
+cd - > /dev/null 2>&1
+cd "$HOME/$private" > /dev/null 2>&1
+
+if ! sh "$init"; then
     echo "nop, init"
     exit 1
 fi
