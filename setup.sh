@@ -1,19 +1,17 @@
 #!/bin/sh
 
 user="Efgeen"
-public="dotfiles"
-private=".$public"
+repo=".dotfiles"
 init="init.sh"
 
-if [ -d "$HOME/$private" ]; then
-    while true; do
-        read -p "~/$private !404, force? (y/n): " force
-        if [ "$force" = "y" ]; then
-            break
-        elif [ "$force" = "n" ]; then
-            exit 0
-        fi
-    done
+if [ -e "$HOME/$repo" ]; then
+    read -p "$HOME/$repo exists, rm -rf? (y/n): " rmrf
+    if [ "$rmrf" = "y" ]; then
+        break
+    else
+        echo "rmrf"
+        exit 1
+    fi
 fi
 
 if ! command -v git > /dev/null 2>&1; then
@@ -21,41 +19,21 @@ if ! command -v git > /dev/null 2>&1; then
     sudo apt-get install git -y
 fi
 
-if [ ! -d "$public" ]; then
-    if ! git clone "https://github.com/$user/$public.git" "$public" > /dev/null 2>&1; then
-        echo "nop, public"
-        exit 1
-    fi
-    cd "$public"
-else
-    cd "$public"
-    if ! git pull > /dev/null 2>&1; then
-        echo "nop, pull"
-        exit 1
-    fi
-fi
+read -p "pass: " pass
 
-read -p "pat: " pat
-
-if ! git submodule set-url "$private" "https://$user:$pat@github.com/$user/$private.git" > /dev/null 2>&1; then
-    echo "nop, set-url"
+if ! git ls-remote -h --exit-code -q "https://$user:$pass@github.com/$user/$repo.git" > /dev/null 2>&1; then
+    echo "pass"
     exit 1
 fi
 
-if ! git submodule update --init > /dev/null 2>&1; then
-    echo "nop, update"
+rm -rf "$HOME/$repo"
+
+if ! git clone "https://$user:$pass@github.com/$user/$repo.git" "$HOME/$repo" > /dev/null 2>&1; then
+    echo "clone"
     exit 1
 fi
 
-rm -rf "$HOME/$private"
-
-if ! ln -s "$(pwd)/$private" "$HOME/$private" > /dev/null 2>&1; then
-    echo "nop, ln"
-    exit 1
-fi
-
-cd - > /dev/null 2>&1
-cd "$HOME/$private" > /dev/null 2>&1
+cd "$HOME/$repo" > /dev/null 2>&1
 
 if ! sh "$init"; then
     echo "nop, init"
