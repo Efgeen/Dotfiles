@@ -49,7 +49,7 @@ fi
 
 rm -rf "$HOME/$private"
 
-if ! ln -s "$(pwd)/$public/$private" "$HOME/$private" > /dev/null 2>&1; then
+if ! ln -s "$(pwd)/$private" "$HOME/$private" > /dev/null 2>&1; then
     echo "nop, ln"
     exit 1
 fi
