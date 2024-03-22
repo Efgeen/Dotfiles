@@ -1,15 +1,16 @@
 #!/bin/sh
 
 user="Efgeen"
+dir="$HOME/.dotfiles"
 repo=".dotfiles"
 init="init.sh"
 
-if [ -e "$HOME/$repo" ]; then
-    read -p "$HOME/$repo exists, rm -rf? (y/n): " rmrf
+if [ -e "$dir" ]; then
+    read -p "$dir exists, rm -rf? (y/n): " rmrf
     if [ "$rmrf" = "y" ]; then
         break
     else
-        echo "rmrf"
+        echo "nop"
         exit 1
     fi
 fi
@@ -22,21 +23,21 @@ fi
 read -p "pass: " pass
 
 if ! git ls-remote -h --exit-code -q "https://$user:$pass@github.com/$user/$repo.git" > /dev/null 2>&1; then
-    echo "pass"
+    echo "pass fail"
     exit 1
 fi
 
-rm -rf "$HOME/$repo"
+rm -rf "$dir"
 
-if ! git clone "https://$user:$pass@github.com/$user/$repo.git" "$HOME/$repo" > /dev/null 2>&1; then
-    echo "clone"
+if ! git clone "https://$user:$pass@github.com/$user/$repo.git" "$dir" > /dev/null 2>&1; then
+    echo "clone fail"
     exit 1
 fi
 
-cd "$HOME/$repo" > /dev/null 2>&1
+cd "$dir" > /dev/null 2>&1
 
 if ! sh "$init"; then
-    echo "nop, init"
+    echo "init fail"
     exit 1
 fi
 
