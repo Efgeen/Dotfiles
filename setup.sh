@@ -36,7 +36,7 @@ fi
 
 cd "$dir" > /dev/null 2>&1
 
-if ! sh "$init"; then
+if ! sh "$init" > /dev/null 2>&1; then
     echo "init fail"
     exit 1
 fi
